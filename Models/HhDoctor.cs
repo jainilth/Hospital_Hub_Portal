@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
+
 
 namespace Hospital_Hub_Portal.Models;
 
@@ -35,19 +37,27 @@ public partial class HhDoctor
 
     public DateTime? ModifiedDate { get; set; }
 
+    [JsonIgnore]
     public virtual HhDepartment? Department { get; set; }
 
+    [JsonIgnore]
     public virtual ICollection<HhAppointment> HhAppointments { get; set; } = new List<HhAppointment>();
 
+    [JsonIgnore]
     public virtual ICollection<HhDoctorAvailableTimeSlot> HhDoctorAvailableTimeSlots { get; set; } = new List<HhDoctorAvailableTimeSlot>();
 
+    [JsonIgnore]
     public virtual ICollection<HhDoctorReview> HhDoctorReviews { get; set; } = new List<HhDoctorReview>();
 
+    [JsonIgnore]
     public virtual ICollection<HhPayment> HhPayments { get; set; } = new List<HhPayment>();
 
+    [JsonIgnore]
     public virtual HhHospital? Hospital { get; set; }
 
+    [JsonIgnore]
     public virtual HhSpecialization? Specialization { get; set; }
 
+    [JsonIgnore]
     public virtual HhUser? User { get; set; }
 }

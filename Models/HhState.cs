@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Hospital_Hub_Portal.Models;
 
@@ -15,7 +16,9 @@ public partial class HhState
 
     public DateTime? ModifiedDate { get; set; }
 
+    [JsonIgnore]
     public virtual HhCountry? Country { get; set; }
 
+    [JsonIgnore]
     public virtual ICollection<HhCity> HhCities { get; set; } = new List<HhCity>();
 }

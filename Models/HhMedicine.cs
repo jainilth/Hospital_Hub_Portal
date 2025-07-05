@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Hospital_Hub_Portal.Models;
 
@@ -27,7 +28,9 @@ public partial class HhMedicine
 
     public DateTime? ModifiedDate { get; set; }
 
+    [JsonIgnore]
     public virtual HhMedicineCategory? Category { get; set; }
 
+    [JsonIgnore]
     public virtual HhMedicineUnit? Unit { get; set; }
 }

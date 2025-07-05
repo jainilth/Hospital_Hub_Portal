@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Hospital_Hub_Portal.Models;
 
@@ -23,7 +24,9 @@ public partial class HhLabReport
 
     public DateTime? ModifiedDate { get; set; }
 
+    [JsonIgnore]
     public virtual HhLabBooking? Booking { get; set; }
 
+    [JsonIgnore]
     public virtual HhUser? UploadedByNavigation { get; set; }
 }
