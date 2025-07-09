@@ -14,7 +14,7 @@ builder.Services.AddDbContext<HospitalHubContext>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp",
-        policy => policy.AllowAnyOrigin()  // <-- React app origin
+        policy => policy.AllowAnyOrigin()  // <-- React app 
                         .AllowAnyHeader()
                         .AllowAnyMethod());
 });
