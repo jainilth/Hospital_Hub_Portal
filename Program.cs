@@ -1,6 +1,7 @@
 using Hospital_Hub_Portal.Models;
 using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
+
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -11,6 +12,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<HospitalHubContext>
     (options => options.UseSqlServer(builder.Configuration.GetConnectionString("ConnectionString")));
 
+<<<<<<< HEAD
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp",
@@ -18,8 +20,23 @@ builder.Services.AddCors(options =>
                         .AllowAnyHeader()
                         .AllowAnyMethod());
 });
+=======
+>>>>>>> develop
 
 var app = builder.Build();
+// .NET 6 and later (Program.cs)
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy("AllowReactApp",
+//        policy => policy
+//            .WithOrigins("http://localhost:5173") // React dev server
+//            .AllowAnyMethod()
+//            .AllowAnyHeader());
+//});
+
+//app.UseCors("AllowReactApp");
+
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -27,7 +44,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowReactApp");
 
 app.UseAuthorization();
 
