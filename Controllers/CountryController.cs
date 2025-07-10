@@ -14,14 +14,32 @@ namespace Hospital_Hub_API.Controllers
             context = _context;
         }
 
-        #region GetAllCountries
+        #region Get Country With Count Of State And City and Hospital
         [HttpGet]
         public IActionResult GetAllCountries()
         {
-            var countries = context.HhCountries.ToList();
+            var countries = context.HhCountries
+                .Select(country => new
+                {
+                    country.CountryId,
+                    country.CountryName,
+                    countryCode = country.CountryName.Substring(0, 2).ToUpper(),
+                    StateCount = context.HhStates.Count(s => s.CountryId == country.CountryId),
+                    CityCount = context.HhCities.Count(c => c.State.CountryId == country.CountryId),
+                }).ToList();
+
             return Ok(countries);
         }
         #endregion
+
+        //#region GetAllCountries
+        //[HttpGet]
+        //public IActionResult GetAllCountries()
+        //{
+        //    var countries = context.HhCountries.ToList();
+        //    return Ok(countries);
+        //}
+        //#endregion
 
         #region GetCountryById
         [HttpGet("{id}")]

@@ -14,6 +14,24 @@ namespace Hospital_Hub_Portal.Controllers
             context = _context;
         }
 
+        //Complete this =------------=
+
+        //#region GetAll City with All the Count of the Hospital
+        //public IActionResult GetAllCity()
+        //{
+        //    var cities = context.HhCities
+        //        .Select(city => new
+        //        {
+        //            city.CityId,
+        //            city.CityName,
+        //            HospitalName = context.HhHospitals
+        //                .Where(h => h.CityId == city.CityId)
+        //                .Select(h => 
+        //        }
+        //        )
+        //        .Where(city => city.CityId == )
+        //}
+
         #region GetAllCity
         [HttpGet]
         public IActionResult GetAllCity()
@@ -33,6 +51,25 @@ namespace Hospital_Hub_Portal.Controllers
                 return BadRequest();
             }
             return Ok(city);
+        }
+        #endregion
+
+        #region AddCity
+        [HttpPost]
+        public IActionResult AddCity([FromBody] HhCity hhCity)
+        {
+            if (hhCity == null)
+            {
+                return BadRequest("City data is null");
+            }
+
+            hhCity.CreatedDate = DateTime.Now;
+            hhCity.ModifiedDate = null;
+
+            context.HhCities.Add(hhCity);
+            context.SaveChanges();
+
+            return CreatedAtAction(nameof(GetCityByID), new { id = hhCity.CityId }, hhCity);
         }
         #endregion
     }
