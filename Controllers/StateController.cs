@@ -13,14 +13,51 @@ namespace Hospital_Hub_Portal.Controllers
             context = _context;
         }
 
-        #region GetAllStates
+        #region GetState List And Their Country and Count Of City and Hospital
         [HttpGet]
-        public IActionResult GetAllStates()
+        public IActionResult GetALlSatate()
         {
-            var states = context.HhStates.ToList();
+            var states = context.HhStates
+                    .Select(state => new
+                    {
+                        state.StateId,
+                        state.StateName,
+                        CountryName = context.HhCountries
+                                .Where(c => c.CountryId == state.CountryId)
+                                .Select(c => c.CountryName),
+                        CityCount = context.HhCities.Count(city => city.StateId == state.StateId),
+                        //Add State ID in the hospital
+                        HospitalCount = context.HhHospitals.Count(h => h.StateId == state.StateId)
+                    })
+        .ToList();
             return Ok(states);
         }
+
+
+        #region Get Country With Count Of State And City and Hospital
+        [HttpGet]
+        public IActionResult GetAllCountries()
+        {
+            var countries = context.HhCountries
+                .Select(country => new
+                {
+                    country.CountryId,
+                    country.CountryName,
+                    StateCount = context.HhStates.Count(s => s.CountryId == country.CountryId),
+                    CityCount = context.HhCities.Count(c => c.State.CountryId == country.CountryId),
+                }).ToList();
+
+            return Ok(countries);
+        }
         #endregion
+        //#region GetAllStates
+        //[HttpGet]
+        //public IActionResult GetAllStates()
+        //{
+        //    var states = context.HhStates.ToList();
+        //    return Ok(states);
+        //}
+        //#endregion
 
         #region GetStateById
         [HttpGet("{id}")]
