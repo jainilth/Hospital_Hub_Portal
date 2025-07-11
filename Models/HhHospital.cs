@@ -16,6 +16,8 @@ public partial class HhHospital
 
     public int? CityId { get; set; }
 
+    public int StateId { get; set; }
+
     public string? HospitalContectNo { get; set; }
 
     public string? HospitalEmail { get; set; }
