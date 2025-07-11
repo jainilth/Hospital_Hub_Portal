@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Hospital_Hub_Portal.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class StateController : Controller
     {
@@ -27,11 +27,12 @@ namespace Hospital_Hub_Portal.Controllers
                                 .Select(c => c.CountryName),
                         CityCount = context.HhCities.Count(city => city.StateId == state.StateId),
                         //Add State ID in the hospital
-                        HospitalCount = context.HhHospitals.Count(h => h.StateId == state.StateId)
+                        //HospitalCount = context.HhHospitals.Count(h => h.StateId == state.StateId)
                     })
         .ToList();
             return Ok(states);
         }
+        #endregion
 
 
         #region Get Country With Count Of State And City and Hospital
@@ -50,6 +51,7 @@ namespace Hospital_Hub_Portal.Controllers
             return Ok(countries);
         }
         #endregion
+
         //#region GetAllStates
         //[HttpGet]
         //public IActionResult GetAllStates()
