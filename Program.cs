@@ -32,7 +32,10 @@ var app = builder.Build();
 //});
 
 //
+<<<<<<< Updated upstream
 app.UseCors("AllowReactApp");
+=======
+>>>>>>> Stashed changes
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -42,6 +45,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowReactApp");
 
 app.UseAuthorization();
 
