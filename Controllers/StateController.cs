@@ -24,7 +24,7 @@ namespace Hospital_Hub_Portal.Controllers
                         state.StateName,
                         CountryName = context.HhCountries
                                 .Where(c => c.CountryId == state.CountryId)
-                                .Select(c => c.CountryName),
+                                .Select(c => c.CountryName).FirstOrDefault(),
                         CityCount = context.HhCities.Count(city => city.StateId == state.StateId),
                         //Add State ID in the hospital
                         //HospitalCount = context.HhHospitals.Count(h => h.StateId == state.StateId)
