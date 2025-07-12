@@ -1,76 +1,99 @@
-﻿using Hospital_Hub_Portal.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿    using Hospital_Hub_Portal.Models;
+    using Microsoft.AspNetCore.Mvc;
 
-namespace Hospital_Hub_Portal.Controllers
-{
-    [Route("/api/[controller]/[action]")]
-    [ApiController]
-    public class CityController : Controller
+    namespace Hospital_Hub_Portal.Controllers
     {
-        private readonly HospitalHubContext context;
+        [Route("/api/[controller]")]
 
-        public CityController(HospitalHubContext _context)
+        [ApiController]
+        public class CityController : Controller
         {
-            context = _context;
-        }
+            private readonly HospitalHubContext context;
 
-        //Complete this =------------=
-
-        //#region GetAll City with All the Count of the Hospital
-        //public IActionResult GetAllCity()
-        //{
-        //    var cities = context.HhCities
-        //        .Select(city => new
-        //        {
-        //            city.CityId,
-        //            city.CityName,
-        //            HospitalName = context.HhHospitals
-        //                .Where(h => h.CityId == city.CityId)
-        //                .Select(h => 
-        //        }
-        //        )
-        //        .Where(city => city.CityId == )
-        //}
-
-        #region GetAllCity
-        [HttpGet]
-        public IActionResult GetAllCity()
-        {
-            var city = context.HhCities.ToList();
-            return Ok(city);
-        }
-        #endregion
-
-        #region GetCityByID
-        [HttpGet("{id}")]
-        public IActionResult GetCityByID(int id)
-        {
-            var city = context.HhCities.Find(id);
-            if (city == null)
+            public CityController(HospitalHubContext _context)
             {
-                return BadRequest();
-            }
-            return Ok(city);
-        }
-        #endregion
-
-        #region AddCity
-        [HttpPost]
-        public IActionResult AddCity([FromBody] HhCity hhCity)
-        {
-            if (hhCity == null)
-            {
-                return BadRequest("City data is null");
+                context = _context;
             }
 
-            hhCity.CreatedDate = DateTime.Now;
-            hhCity.ModifiedDate = null;
+            #region GetAll City with All the Count of the Hospital
+            [HttpGet]
+            public IActionResult GetAllCity()
+            {
+                var cities = context.HhCities
+                    .Select(city => new
+                    {
+                        city.CityId,
+                        city.CityName,
 
-            context.HhCities.Add(hhCity);
-            context.SaveChanges();
+                        StateName = context.HhStates
+                                        .Where(s => s.StateId == city.StateId)
+                                        .Select(s => s.StateName)
+                                        .FirstOrDefault(),
 
-            return CreatedAtAction(nameof(GetCityByID), new { id = hhCity.CityId }, hhCity);
+                        CountryName = context.HhCountries
+                                        .Where(c => c.CountryId ==
+                                            context.HhStates
+                                                .Where(s => s.StateId == city.StateId)
+                                                .Select(s => s.CountryId)
+                                                .FirstOrDefault()
+                                        )
+                                        .Select(c => c.CountryName)
+                                        .FirstOrDefault(),
+
+                        HospitalCount = context.HhHospitals
+                                            .Count(h => h.CityId == city.CityId)
+                    })
+                    .ToList();
+
+                return Ok(cities);
+            }
+            #endregion
+
+            #region GetCityByID
+            [HttpGet("{id}")]
+            public IActionResult GetCityByID(int id)
+            {
+                var city = context.HhCities.Find(id);
+                if (city == null)
+                {
+                    return BadRequest();
+                }
+                return Ok(city);
+            }
+            #endregion
+
+            #region AddCity
+            [HttpPost]
+            public IActionResult AddCity([FromBody] HhCity hhCity)
+            {
+                if (hhCity == null)
+                {
+                    return BadRequest("City data is null");
+                }
+
+                hhCity.CreatedDate = DateTime.Now;
+                hhCity.ModifiedDate = null;
+
+                context.HhCities.Add(hhCity);
+                context.SaveChanges();
+
+                return CreatedAtAction(nameof(GetCityByID), new { id = hhCity.CityId }, hhCity);
+            }
+            #endregion
+
+            #region Delet City
+            [HttpDelete("{id}")]
+            public IActionResult DeleteCity(int id)
+            {
+                var city = context.HhCities.FirstOrDefault(c => c.CityId ==  id);
+                if (city == null)
+                {
+                    return NotFound();
+                }
+                context.HhCities.Remove(city);
+                context.SaveChanges();
+                return Ok(city);
+            }
+            #endregion
         }
-        #endregion
     }
-}

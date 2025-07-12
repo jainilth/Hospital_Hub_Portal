@@ -26,6 +26,12 @@ namespace Hospital_Hub_API.Controllers
                     countryCode = country.CountryName.Substring(0, 2).ToUpper(),
                     StateCount = context.HhStates.Count(s => s.CountryId == country.CountryId),
                     CityCount = context.HhCities.Count(c => c.State.CountryId == country.CountryId),
+                    HospitalCount = context.HhHospitals
+                        .Count(h => context.HhCities
+                        .Any(c => c.CityId == h.CityId &&
+                        context.HhStates.Any(s => s.StateId == c.StateId && s.CountryId == country.CountryId)
+                )
+            )
                 }).ToList();
 
             return Ok(countries);

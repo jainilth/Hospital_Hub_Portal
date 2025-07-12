@@ -13,6 +13,13 @@ namespace Hospital_Hub_Portal.Controllers
             context = _context;
         }
 
+        [HttpGet]
+        public ActionResult Index()
+        {
+            var country = context.HhStates.ToList();
+            return Ok(country);
+        }
+
         #region GetState List And Their Country and Count Of City and Hospital
         [HttpGet]
         public IActionResult GetALlSatate()
@@ -26,8 +33,7 @@ namespace Hospital_Hub_Portal.Controllers
                                 .Where(c => c.CountryId == state.CountryId)
                                 .Select(c => c.CountryName).FirstOrDefault(),
                         CityCount = context.HhCities.Count(city => city.StateId == state.StateId),
-                        //Add State ID in the hospital
-                        //HospitalCount = context.HhHospitals.Count(h => h.StateId == state.StateId)
+                        HospitalCount = context.HhHospitals.Count(h => h.StateId == state.StateId)
                     })
         .ToList();
             return Ok(states);

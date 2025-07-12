@@ -57,6 +57,7 @@ public partial class HospitalHubContext : DbContext
 
     public virtual DbSet<HhUser> HhUsers { get; set; }
 
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<HhAppointment>(entity =>
