@@ -1,5 +1,8 @@
-﻿using Hospital_Hub_Portal.Models;
+﻿using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
+using Hospital_Hub_Portal.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Hospital_Hub_API.Controllers
 {
@@ -7,17 +10,21 @@ namespace Hospital_Hub_API.Controllers
     [ApiController]
     public class DoctorController : Controller
     {
-        private readonly HospitalHubContext context;
-        public DoctorController(HospitalHubContext _context)
+        private readonly HospitalHubContext _context;
+        private readonly Cloudinary _cloudinary;
+
+        // Inject Cloudinary and your DbContext via DI
+        public DoctorController(HospitalHubContext context, Cloudinary cloudinary)
         {
-            context = _context;
+            _context = context;
+            _cloudinary = cloudinary;
         }
 
         #region GetAllDoctors
         [HttpGet]
         public IActionResult GetAllDoctors()
         {
-            var doctors = context.HhDoctors.ToList();
+            var doctors = _context.HhDoctors.ToList();
             return Ok(doctors);
         }
         #endregion
@@ -26,7 +33,7 @@ namespace Hospital_Hub_API.Controllers
         [HttpGet("{id}")]
         public IActionResult GetDoctorById(int id)
         {
-            var doctor = context.HhDoctors.Find(id);
+            var doctor = _context.HhDoctors.Find(id);
             if (doctor == null)
             {
                 return NotFound();
@@ -37,17 +44,52 @@ namespace Hospital_Hub_API.Controllers
 
         #region AddDoctor
         [HttpPost]
-        public IActionResult AddDoctor([FromBody] HhDoctor hhDoctor)
+        public async Task<IActionResult> AddDoctor([FromForm] DoctorWithPhotoDto dto)
         {
-            if (hhDoctor == null)
-            {
-                return BadRequest("Doctor data is null");
-            }
-            hhDoctor.CreatedDate = DateTime.Now;
-            hhDoctor.ModifiedDate = null;
-            context.HhDoctors.Add(hhDoctor);
-            context.SaveChanges();
-            return CreatedAtAction(nameof(GetDoctorById), new { id = hhDoctor.DoctorId }, hhDoctor);
+           var doctor = new HhDoctor
+           {
+               DoctorName = dto.DoctorName,
+               ConsultationFee = dto.ConsultationFee,
+               DoctorEmail = dto.DoctorEmail,
+               DoctorContectNo = dto.DoctorContectNo,
+               DoctorGender = dto.DoctorGender,
+               SpecializationId = dto.SpecializationId,
+               DepartmentId = dto.DepartmentId,
+               HospitalId = dto.HospitalId,
+               DoctorExperienceYears = dto.DoctorExperienceYears,
+               Rating = dto.Rating,
+               UserId = dto.UserId,
+               CreatedDate = DateTime.Now,
+               ModifiedDate = DateTime.Now
+           };
+
+           if (dto.ProfilePhoto != null && dto.ProfilePhoto.Length > 0)
+           {
+               using (var stream = dto.ProfilePhoto.OpenReadStream())
+               {
+                   var uploadParams = new ImageUploadParams
+                   {
+                       File = new FileDescription(dto.ProfilePhoto.FileName, stream)
+                   };
+
+                   var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+
+                   if (uploadResult.StatusCode != System.Net.HttpStatusCode.OK)
+                       return BadRequest("Image upload failed: " + uploadResult.Error?.Message);
+
+                   doctor.DoctorPhotoUrl = uploadResult.SecureUrl.ToString();
+               }
+           }
+
+           _context.HhDoctors.Add(doctor);
+           await _context.SaveChangesAsync();
+
+           return Ok(new
+           {
+               message = "Doctor added successfully",
+               doctorId = doctor.DoctorId,
+               photoUrl = doctor.DoctorPhotoUrl
+           });
         }
         #endregion
 
@@ -59,7 +101,7 @@ namespace Hospital_Hub_API.Controllers
             {
                 return BadRequest("Doctor data is null or ID mismatch");
             }
-            var existingDoctor = context.HhDoctors.Find(id);
+            var existingDoctor = _context.HhDoctors.Find(id);
             if (existingDoctor == null)
             {
                 return NotFound();
@@ -77,7 +119,7 @@ namespace Hospital_Hub_API.Controllers
             existingDoctor.Rating = hhDoctor.Rating;
             existingDoctor.UserId = hhDoctor.UserId;
             existingDoctor.ModifiedDate = DateTime.Now;
-            context.SaveChanges();
+            _context.SaveChanges();
             return NoContent();
         }
         #endregion
@@ -86,13 +128,13 @@ namespace Hospital_Hub_API.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteDoctor(int id)
         {
-            var doctor = context.HhDoctors.Find(id);
+            var doctor = _context.HhDoctors.Find(id);
             if (doctor == null)
             {
                 return NotFound();
             }
-            context.HhDoctors.Remove(doctor);
-            context.SaveChanges();
+            _context.HhDoctors.Remove(doctor);
+            _context.SaveChanges();
             return NoContent();
         }
         #endregion
