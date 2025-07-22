@@ -15,9 +15,9 @@
                 context = _context;
             }
 
-            #region GetAll City with All the Count of the Hospital
-            [HttpGet]
-            public IActionResult GetAllCity()
+        #region GetAll City with All the Count of the Hospital
+        [HttpGet]
+        public IActionResult GetAllCity()
             {
                 var cities = context.HhCities
                     .Select(city => new
@@ -47,43 +47,52 @@
 
                 return Ok(cities);
             }
-            #endregion
+        #endregion
 
-            #region GetCityByID
-            [HttpGet("{id}")]
-            public IActionResult GetCityByID(int id)
-            {
-                var city = context.HhCities.Find(id);
-                if (city == null)
+        #region GetCityByID
+        [HttpGet("{id}")]
+        public IActionResult GetCityById(int id)
+        {
+            var city = context.HhCities
+                .Where(c => c.CityId == id)
+                .Select(c => new
                 {
-                    return BadRequest();
-                }
-                return Ok(city);
-            }
-            #endregion
+                    cityId = c.CityId,
+                    cityName = c.CityName,
+                    stateId = c.StateId,
+                    countryId = c.State != null ? c.State.CountryId : null
+                })
+                .FirstOrDefault();
 
-            #region AddCity
-            [HttpPost]
-            public IActionResult AddCity([FromBody] HhCity hhCity)
+            if (city == null)
+                return NotFound();
+
+            return Ok(city);
+        }
+        #endregion
+
+        #region Add City
+        [HttpPost]
+        public IActionResult AddCity([FromBody] HhCity hhCity)
+        {
+            if (hhCity == null || string.IsNullOrWhiteSpace(hhCity.CityName) || hhCity.StateId == null)
             {
-                if (hhCity == null)
-                {
-                    return BadRequest("City data is null");
-                }
-
-                hhCity.CreatedDate = DateTime.Now;
-                hhCity.ModifiedDate = null;
-
-                context.HhCities.Add(hhCity);
-                context.SaveChanges();
-
-                return CreatedAtAction(nameof(GetCityByID), new { id = hhCity.CityId }, hhCity);
+                return BadRequest("Invalid city data.");
             }
-            #endregion
 
-            #region Delet City
-            [HttpDelete("{id}")]
-            public IActionResult DeleteCity(int id)
+            hhCity.CreatedDate = DateTime.Now;
+            hhCity.ModifiedDate = DateTime.Now;
+
+            context.HhCities.Add(hhCity);
+            context.SaveChanges();
+
+            return Ok(hhCity);
+        }
+        #endregion
+
+        #region Delet City
+        [HttpDelete("{id}")]
+        public IActionResult DeleteCity(int id)
             {
                 var city = context.HhCities.FirstOrDefault(c => c.CityId ==  id);
                 if (city == null)
@@ -94,6 +103,36 @@
                 context.SaveChanges();
                 return Ok(city);
             }
+<<<<<<< Updated upstream
             #endregion
         }
+=======
+        #endregion
+
+        #region Edit Citymo
+        [HttpPut("{id}")]
+        public IActionResult CityEdit(int id, [FromBody] HhCity hhCity)
+        {
+            if (hhCity == null || id != hhCity.CityId)
+            {
+                return BadRequest("Invalid city data or mismatched ID");
+            }
+
+            var existingCity = context.HhCities.Find(id);
+            if (existingCity == null)
+            {
+                return NotFound();
+            }
+
+            existingCity.CityName = hhCity.CityName;
+            existingCity.StateId = hhCity.StateId;
+            existingCity.ModifiedDate = DateTime.Now;
+
+            context.SaveChanges();
+
+            return Ok(existingCity);
+        }
+        #endregion
+        
+>>>>>>> Stashed changes
     }
