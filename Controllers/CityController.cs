@@ -105,15 +105,6 @@
             }
         #endregion
 
-        //#region Edit City
-        //[HttpPost]
-        //public async Task<IActionResult> AddEdit(HhCity hhCity)
-        //{
-
-        //}
-            //#endregion
-        //}
-        //#endregion
 
         #region Edit Citymo
         [HttpPut("{id}")]
