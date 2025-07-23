@@ -130,5 +130,17 @@ namespace Hospital_Hub_Portal.Controllers
             return NoContent();
         }
         #endregion
+
+        #region GetStaetByCountry
+        [HttpGet("{countryId}")]
+        public IActionResult GetStatesByCountry(int countryId)
+        {
+            var states = context.HhStates
+                .Where(s => s.CountryId == countryId)
+                .ToList();
+
+            return Ok(states);
+        }
+        #endregion
     }
 }
