@@ -58,15 +58,6 @@ namespace Hospital_Hub_Portal.Controllers
         }
         #endregion
 
-        //#region GetAllStates
-        //[HttpGet]
-        //public IActionResult GetAllStates()
-        //{
-        //    var states = context.HhStates.ToList();
-        //    return Ok(states);
-        //}
-        //#endregion
-
         #region GetStateById
         [HttpGet("{id}")]
         public IActionResult GetStateById(int id)
