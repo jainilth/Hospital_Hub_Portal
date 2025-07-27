@@ -206,6 +206,7 @@ public partial class HospitalHubContext : DbContext
                 .HasColumnType("decimal(2, 1)");
             entity.Property(e => e.SpecializationId).HasColumnName("SpecializationID");
             entity.Property(e => e.UserId).HasColumnName("UserID");
+            entity.Property(e => e.Qualification).HasMaxLength(50);
 
             entity.HasOne(d => d.Department).WithMany(p => p.HhDoctors)
                 .HasForeignKey(d => d.DepartmentId)

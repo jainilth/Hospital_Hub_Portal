@@ -6,7 +6,7 @@
 
 namespace Hospital_Hub_Portal.Controllers
     {
-    [Route("/api/[controller]")]
+    [Route("/api/[controller]/[Action]")]
 
     [ApiController]
     public class CityController : Controller

@@ -59,6 +59,7 @@ namespace Hospital_Hub_API.Controllers
                DoctorExperienceYears = dto.DoctorExperienceYears,
                Rating = dto.Rating,
                UserId = dto.UserId,
+               Qualification = dto.Qualification,
                CreatedDate = DateTime.Now,
                ModifiedDate = DateTime.Now
            };
@@ -118,6 +119,7 @@ namespace Hospital_Hub_API.Controllers
             existingDoctor.DoctorExperienceYears = hhDoctor.DoctorExperienceYears;
             existingDoctor.Rating = hhDoctor.Rating;
             existingDoctor.UserId = hhDoctor.UserId;
+            existingDoctor.Qualification = hhDoctor.Qualification;
             existingDoctor.ModifiedDate = DateTime.Now;
             _context.SaveChanges();
             return NoContent();

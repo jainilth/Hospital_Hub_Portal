@@ -37,6 +37,8 @@ public partial class HhDoctor
 
     public DateTime? ModifiedDate { get; set; }
 
+    public string? Qualification { get; set; }
+
     [JsonIgnore]
     public virtual HhDepartment? Department { get; set; }
 

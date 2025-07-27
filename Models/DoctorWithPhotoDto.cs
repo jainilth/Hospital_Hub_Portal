@@ -16,6 +16,7 @@ namespace Hospital_Hub_Portal.Models
         public int? DoctorExperienceYears { get; set; }
         public decimal? Rating { get; set; }
         public int? UserId { get; set; }
+        public string? Qualification { get; set; }
         public IFormFile ProfilePhoto { get; set; }
     }
 } 
