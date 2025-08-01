@@ -199,6 +199,14 @@ public partial class HospitalHubContext : DbContext
             entity.Property(e => e.DoctorPhotoUrl)
                 .HasMaxLength(200)
                 .HasColumnName("DoctorPhotoURL");
+            entity.Property(e => e.DoctorCityId).HasColumnName("DoctorCityId");
+            entity.Property(e => e.DoctorStateId).HasColumnName("DoctorStateId");
+            entity.Property(e => e.DoctorCountryId).HasColumnName("DoctorCountryId");
+            entity.Property(e => e.StartWorkTime).HasColumnType("time(7)");
+            entity.Property(e => e.EndWorkTime).HasColumnType("time(7)");
+            entity.Property(e => e.TotalPatient);
+            entity.Property(e => e.DoctorAddress).HasMaxLength(200);
+            entity.Property(e => e.AvailabilityStatus).HasMaxLength(30);
             entity.Property(e => e.HospitalId).HasColumnName("HospitalID");
             entity.Property(e => e.ModifiedDate).HasColumnType("datetime");
             entity.Property(e => e.Rating)

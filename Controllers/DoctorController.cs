@@ -60,6 +60,14 @@ namespace Hospital_Hub_API.Controllers
                Rating = dto.Rating,
                UserId = dto.UserId,
                Qualification = dto.Qualification,
+               DoctorCityId = dto.DoctorCityId,
+               DoctorStateId = dto.DoctorStateId,
+               DoctorCountryId = dto.DoctorCountryId,
+               StartWorkTime = dto.StartWorkTime,
+               EndWorkTime = dto.EndWorkTime,
+               TotalPatient = dto.TotalPatient,
+               DoctorAddress = dto.DoctorAddress,
+               AvailabilityStatus = dto.AvailabilityStatus,
                CreatedDate = DateTime.Now,
                ModifiedDate = DateTime.Now
            };
@@ -120,6 +128,14 @@ namespace Hospital_Hub_API.Controllers
             existingDoctor.Rating = hhDoctor.Rating;
             existingDoctor.UserId = hhDoctor.UserId;
             existingDoctor.Qualification = hhDoctor.Qualification;
+            existingDoctor.DoctorCityId = hhDoctor.DoctorCityId;
+            existingDoctor.DoctorStateId = hhDoctor.DoctorStateId;
+            existingDoctor.DoctorCountryId = hhDoctor.DoctorCountryId;
+            existingDoctor.StartWorkTime = hhDoctor.StartWorkTime;
+            existingDoctor.EndWorkTime = hhDoctor.EndWorkTime;
+            existingDoctor.TotalPatient = hhDoctor.TotalPatient;
+            existingDoctor.DoctorAddress = hhDoctor.DoctorAddress;
+            existingDoctor.AvailabilityStatus = hhDoctor.AvailabilityStatus;
             existingDoctor.ModifiedDate = DateTime.Now;
             _context.SaveChanges();
             return NoContent();

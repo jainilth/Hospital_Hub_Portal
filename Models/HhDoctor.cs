@@ -39,6 +39,15 @@ public partial class HhDoctor
 
     public string? Qualification { get; set; }
 
+    public int? DoctorCityId { get; set; }
+    public int? DoctorStateId { get; set; }
+    public int? DoctorCountryId { get; set; }
+    public TimeSpan? StartWorkTime { get; set; }
+    public TimeSpan? EndWorkTime { get; set; }
+    public int? TotalPatient { get; set; }
+    public string? DoctorAddress { get; set; }
+    public string? AvailabilityStatus { get; set; }
+
     [JsonIgnore]
     public virtual HhDepartment? Department { get; set; }
 
