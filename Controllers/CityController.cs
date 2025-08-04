@@ -1,12 +1,13 @@
 ﻿    using Hospital_Hub_Portal.Models;
     using Microsoft.AspNetCore.Mvc;
+    using OfficeOpenXml;
     //using Microsoft.EntityFrameworkCore;
     //using OfficeOpenXml;
 
 
-namespace Hospital_Hub_Portal.Controllers
+namespace Hospital_Hub_API.Controllers
     {
-    [Route("/api/[controller]/[Action]")]
+    [Route("/api/[controller]/[action]")]
 
     [ApiController]
     public class CityController : Controller
@@ -45,6 +46,103 @@ namespace Hospital_Hub_Portal.Controllers
 
                     HospitalCount = context.HhHospitals
                                         .Count(h => h.CityId == city.CityId)
+                })
+                .ToList();
+
+            return Ok(cities);
+        }
+        #endregion
+
+        #region Export Cities to Excel
+        [HttpGet]
+        public IActionResult ExportToExcel()
+        {
+            try
+            {
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+                var cities = context.HhCities
+                    .Select(city => new
+                    {
+                        CityId = city.CityId,
+                        CityName = city.CityName,
+                        StateName = context.HhStates
+                            .Where(s => s.StateId == city.StateId)
+                            .Select(s => s.StateName)
+                            .FirstOrDefault(),
+                        CountryName = context.HhCountries
+                            .Where(c => c.CountryId ==
+                                context.HhStates
+                                    .Where(s => s.StateId == city.StateId)
+                                    .Select(s => s.CountryId)
+                                    .FirstOrDefault()
+                            )
+                            .Select(c => c.CountryName)
+                            .FirstOrDefault(),
+                        HospitalCount = context.HhHospitals
+                            .Count(h => h.CityId == city.CityId)
+                    }).ToList();
+
+                if (cities.Count == 0)
+                    return BadRequest("No city data found.");
+
+                using (var package = new ExcelPackage())
+                {
+                    var worksheet = package.Workbook.Worksheets.Add("Cities");
+                    
+                    // Add headers
+                    worksheet.Cells["A1"].Value = "City ID";
+                    worksheet.Cells["B1"].Value = "City Name";
+                    worksheet.Cells["C1"].Value = "State Name";
+                    worksheet.Cells["D1"].Value = "Country Name";
+                    worksheet.Cells["E1"].Value = "Hospital Count";
+
+                    // Style headers
+                    using (var range = worksheet.Cells["A1:E1"])
+                    {
+                        range.Style.Font.Bold = true;
+                        range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                        range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightCoral);
+                    }
+
+                    // Add data
+                    for (int i = 0; i < cities.Count; i++)
+                    {
+                        worksheet.Cells[$"A{i + 2}"].Value = cities[i].CityId;
+                        worksheet.Cells[$"B{i + 2}"].Value = cities[i].CityName;
+                        worksheet.Cells[$"C{i + 2}"].Value = cities[i].StateName;
+                        worksheet.Cells[$"D{i + 2}"].Value = cities[i].CountryName;
+                        worksheet.Cells[$"E{i + 2}"].Value = cities[i].HospitalCount;
+                    }
+
+                    // Auto-fit columns
+                    worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
+
+                    var excelBytes = package.GetAsByteArray();
+
+                    return File(excelBytes,
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        "Cities_Data.xlsx");
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error exporting to Excel: {ex.Message}");
+            }
+        }
+        #endregion
+
+        #region GetCitiesByState
+        [HttpGet("GetCitiesByState/{stateId}")]
+        public IActionResult GetCitiesByState(int stateId)
+        {
+            var cities = context.HhCities
+                .Where(c => c.StateId == stateId)
+                .Select(c => new
+                {
+                    c.CityId,
+                    c.CityName,
+                    c.StateId
                 })
                 .ToList();
 
@@ -135,47 +233,5 @@ namespace Hospital_Hub_Portal.Controllers
             return Ok(existingCity);
         }
         #endregion
-
-        //#region Export Data In The Excel
-        //[HttpGet("ExportToExcel")]
-        //public IActionResult ExportToExcel()
-        //{
-        //    try
-        //    {
-        //        ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-
-        //        var cities = context.HhCities
-        //            .Include(c => c.State)
-        //            .ThenInclude(s => s.Country)
-        //            .Select(c => new
-        //            {
-        //                CityId = c.CityId,
-        //                CityName = c.CityName,
-        //                StateName = c.State != null ? c.State.StateName : "N/A",
-        //                CountryName = c.State != null && c.State.Country != null ? c.State.Country.CountryName : "N/A"
-        //            }).ToList();
-
-        //        if (cities.Count == 0)
-        //            return BadRequest("No city data found.");
-
-        //        using (var package = new ExcelPackage())
-        //        {
-        //            var worksheet = package.Workbook.Worksheets.Add("Cities");
-        //            worksheet.Cells["A1"].LoadFromCollection(cities, true);
-        //            worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
-
-        //            var excelBytes = package.GetAsByteArray();
-
-        //            return File(excelBytes,
-        //                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        //                "CityData.xlsx");
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest("Error exporting to Excel: " + ex.Message + (ex.InnerException != null ? " | Inner: " + ex.InnerException.Message : ""));
-        //    }
-        //}
-        //#endregion
     }
 }
