@@ -3,6 +3,7 @@ using CloudinaryDotNet.Actions;
 using Hospital_Hub_Portal.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace Hospital_Hub_API.Controllers
 {
@@ -25,6 +26,39 @@ namespace Hospital_Hub_API.Controllers
         public IActionResult GetAllDoctors()
         {
             var doctors = _context.HhDoctors.ToList();
+            return Ok(doctors);
+        }
+        #endregion
+
+        #region GetDoctorsBySpecialization
+        // GET: api/Doctor/GetDoctorsBySpecialization/{specializationId}
+        [HttpGet("{specializationId}")]
+        public IActionResult GetDoctorsBySpecialization(int specializationId)
+        {
+            var doctors = _context.HhDoctors
+                .Where(d => d.SpecializationId == specializationId)
+                .Select(d => new DoctorListItemDto
+                {
+                    DoctorId = d.DoctorId,
+                    DoctorName = d.DoctorName,
+                    DoctorPhotoUrl = d.DoctorPhotoUrl,
+                    ConsultationFee = d.ConsultationFee,
+                    DoctorEmail = d.DoctorEmail,
+                    DoctorContectNo = d.DoctorContectNo,
+                    DoctorGender = d.DoctorGender,
+                    SpecializationId = d.SpecializationId,
+                    SpecializationName = d.Specialization != null ? d.Specialization.SpecializationName : null,
+                    HospitalId = d.HospitalId,
+                    HospitalName = d.Hospital != null ? d.Hospital.HospitalName : null,
+                    DoctorExperienceYears = d.DoctorExperienceYears,
+                    Rating = d.Rating,
+                    Qualification = d.Qualification,
+                    AvailabilityStatus = d.AvailabilityStatus,
+                    DoctorAddress = d.DoctorAddress,
+                    TotalPatient = d.TotalPatient
+                })
+                .ToList();
+
             return Ok(doctors);
         }
         #endregion

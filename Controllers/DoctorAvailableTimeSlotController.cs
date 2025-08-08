@@ -1,5 +1,6 @@
 ﻿using Hospital_Hub_Portal.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Hospital_Hub_API.Controllers
 {
@@ -18,6 +19,20 @@ namespace Hospital_Hub_API.Controllers
         public IActionResult GetAllDoctorAvailableTimeSlots()
         {
             var timeSlots = context.HhDoctorAvailableTimeSlots.ToList();
+            return Ok(timeSlots);
+        }
+        #endregion
+
+        #region GetByDoctor
+        // GET: api/DoctorAvailableTimeSlot/GetByDoctor/{doctorId}
+        [HttpGet("{doctorId}")]
+        public IActionResult GetByDoctor(int doctorId)
+        {
+            var timeSlots = context.HhDoctorAvailableTimeSlots
+                .Where(s => s.DoctorId == doctorId)
+                .OrderBy(s => s.DayOfWeek)
+                .ThenBy(s => s.StartTime)
+                .ToList();
             return Ok(timeSlots);
         }
         #endregion
