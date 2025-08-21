@@ -1,45 +1,62 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace Hospital_Hub_Portal.Models;
 
+[Table("HH_LabBooking")]
 public partial class HhLabBooking
 {
+    [Key]
+    [Column("BookingID")]
     public int BookingId { get; set; }
 
+    [Column("UserID")]
     public int? UserId { get; set; }
 
+    [Column("TestID")]
     public int? TestId { get; set; }
 
+    [Column("HospitalID")]
     public int? HospitalId { get; set; }
 
+    [Column(TypeName = "datetime")]
     public DateTime? BookingDateTime { get; set; }
 
+    [StringLength(20)]
     public string? BookingStatus { get; set; }
 
     public string? Symptoms { get; set; }
 
+    [Column(TypeName = "datetime")]
     public DateTime? CreatedDate { get; set; }
 
+    [Column("PaymentID")]
     public int? PaymentId { get; set; }
 
     public bool? IsReportReady { get; set; }
 
+    [Column(TypeName = "datetime")]
     public DateTime? ModifiedDate { get; set; }
 
-    [JsonIgnore]
+    [InverseProperty("Booking")]
     public virtual ICollection<HhLabReport> HhLabReports { get; set; } = new List<HhLabReport>();
 
-    [JsonIgnore]
+    [ForeignKey("HospitalId")]
+    [InverseProperty("HhLabBookings")]
     public virtual HhHospital? Hospital { get; set; }
 
-    [JsonIgnore]
+    [ForeignKey("PaymentId")]
+    [InverseProperty("HhLabBookings")]
     public virtual HhPayment? Payment { get; set; }
 
-    [JsonIgnore]
+    [ForeignKey("TestId")]
+    [InverseProperty("HhLabBookings")]
     public virtual HhLabTest? Test { get; set; }
 
-    [JsonIgnore]
+    [ForeignKey("UserId")]
+    [InverseProperty("HhLabBookings")]
     public virtual HhUser? User { get; set; }
 }

@@ -21,14 +21,49 @@ namespace Hospital_Hub_API.Controllers
             _cloudinary = cloudinary;
         }
 
+        //[HttpGet]
+        //public IActionResult GetAllDoctors()
+        //{
+        //    var doctors = _context.HhDoctors.ToList();
+        //    return Ok(doctors);
+        //}
+
         #region GetAllDoctors
         [HttpGet]
         public IActionResult GetAllDoctors()
         {
-            var doctors = _context.HhDoctors.ToList();
+            var doctors = _context.HhDoctors
+                .Include(d => d.Specialization) // join specialization
+                .Select(d => new
+                {
+                    d.DoctorId,
+                    d.DoctorName,
+                    d.DoctorPhotoUrl,
+                    d.ConsultationFee,
+                    d.DoctorEmail,
+                    d.DoctorContectNo,
+                    d.DoctorGender,
+                    d.DepartmentId,
+                    d.HospitalId,
+                    d.DoctorExperienceYears,
+                    d.Rating,
+                    d.UserId,
+                    d.CreatedDate,
+                    d.ModifiedDate,
+                    d.Qualification,
+                    d.DoctorAddress,
+                    d.AvailabilityStatus,
+
+                    // Specialization info
+                    SpecializationId = d.SpecializationId,
+                    SpecializationName = d.Specialization.SpecializationName
+                })
+                .ToList();
+
             return Ok(doctors);
         }
         #endregion
+
 
         #region GetDoctorsBySpecialization
         // GET: api/Doctor/GetDoctorsBySpecialization/{specializationId}
@@ -97,8 +132,8 @@ namespace Hospital_Hub_API.Controllers
                DoctorCityId = dto.DoctorCityId,
                DoctorStateId = dto.DoctorStateId,
                DoctorCountryId = dto.DoctorCountryId,
-               StartWorkTime = dto.StartWorkTime,
-               EndWorkTime = dto.EndWorkTime,
+               //StartWorkTime = dto.StartWorkTime,
+               //EndWorkTime = dto.EndWorkTime,
                TotalPatient = dto.TotalPatient,
                DoctorAddress = dto.DoctorAddress,
                AvailabilityStatus = dto.AvailabilityStatus,
