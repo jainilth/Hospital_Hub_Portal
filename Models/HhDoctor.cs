@@ -123,6 +123,4 @@ public partial class HhDoctor
     [InverseProperty("HhDoctors")]
     public virtual HhUser? User { get; set; }
 
-    [InverseProperty("ChatUser")]
-    public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

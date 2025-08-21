@@ -20,6 +20,10 @@ public partial class Message
     [StringLength(500)]
     public string Message1 { get; set; } = null!;
 
+
+    [Column(TypeName = "datetime")]
+    public DateTime? CreatedAt { get; set; }
+
     public int SendBy { get; set; }
 
     [ForeignKey("ConversationId")]

@@ -91,6 +91,4 @@ public partial class HhUser
     [InverseProperty("User")]
     public virtual ICollection<HhSpecialization> HhSpecializations { get; set; } = new List<HhSpecialization>();
 
-    [InverseProperty("ChatUserNavigation")]
-    public virtual ICollection<User> Users { get; set; } = new List<User>();
 }
