@@ -2,6 +2,7 @@
 using Hospital_Hub_Portal.Models.Auth;
 using Hospital_Hub_Portal.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Hospital_Hub_Portal.Controllers
 {
@@ -21,6 +22,7 @@ namespace Hospital_Hub_Portal.Controllers
         }
 
         // ✅ Test endpoint to verify API is working
+        [AllowAnonymous]
         [HttpGet("test")]
         public IActionResult Test()
         {
@@ -28,6 +30,7 @@ namespace Hospital_Hub_Portal.Controllers
         }
 
         // ✅ Register endpoint
+        [AllowAnonymous]
         [HttpPost("register")]
         public IActionResult Register([FromBody] RegisterRequest request)
         {
@@ -69,6 +72,7 @@ namespace Hospital_Hub_Portal.Controllers
         }
 
         // ✅ Login endpoint
+        [AllowAnonymous]
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest request)
         {
@@ -80,20 +84,36 @@ namespace Hospital_Hub_Portal.Controllers
                     return BadRequest(new { Message = "Email and password are required" });
                 }
 
-                var user = _context.HhUsers.FirstOrDefault(u => u.UserEmail == request.Email);
+                var email = request.Email?.Trim();
+                var user = _context.HhUsers.FirstOrDefault(u => u.UserEmail.ToLower() == email.ToLower());
                 if (user == null)
                 {
                     return Unauthorized(new { Message = "Invalid email or password" });
                 }
 
-                // Verify password
-                if (!_passwordService.VerifyPassword(request.Password, user.UserPassword))
+                // Verify password (support legacy plaintext passwords by rehousing on the fly)
+                var passwordValid = _passwordService.VerifyPassword(request.Password, user.UserPassword);
+                if (!passwordValid)
+                {
+                    // Legacy fallback: if stored password is plaintext and matches input, rehash and save
+                    if (user.UserPassword == request.Password)
+                    {
+                        user.UserPassword = _passwordService.HashPassword(request.Password);
+                        _context.HhUsers.Update(user);
+                        _context.SaveChanges();
+                        passwordValid = true;
+                    }
+                }
+
+                if (!passwordValid)
                 {
                     return Unauthorized(new { Message = "Invalid email or password" });
                 }
 
                 // Generate JWT token
                 var token = _tokenService.CreateAccessToken(user);
+
+                var safeRole = string.IsNullOrWhiteSpace(user.UserRole) ? "User" : user.UserRole;
 
                 return Ok(new
                 {
@@ -103,7 +123,7 @@ namespace Hospital_Hub_Portal.Controllers
                         user.UserId,
                         user.UserName,
                         user.UserEmail,
-                        user.UserRole
+                        UserRole = safeRole
                     },
                     Message = "Login successful"
                 });
@@ -115,6 +135,7 @@ namespace Hospital_Hub_Portal.Controllers
         }
 
         // ✅ Validate token endpoint
+        [Authorize]
         [HttpGet("validate")]
         public IActionResult ValidateToken()
         {
@@ -151,6 +172,7 @@ namespace Hospital_Hub_Portal.Controllers
         }
 
         // ✅ Get current user info (protected endpoint)
+        [Authorize]
         [HttpGet("me")]
         public IActionResult GetCurrentUser()
         {
