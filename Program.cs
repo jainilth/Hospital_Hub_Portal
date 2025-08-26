@@ -1,32 +1,48 @@
+using System.Text;
 using CloudinaryDotNet;
 using Hospital_Hub_Portal;
 using Hospital_Hub_Portal.Hubs;
 using Hospital_Hub_Portal.Models;
+using Hospital_Hub_Portal.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// -------------------------
+// Add services
+// -------------------------
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<HospitalHubContext>
-    (options => options.UseSqlServer(builder.Configuration.GetConnectionString("ConnectionString")));
+// -------------------------
+// DbContext
+// -------------------------
+builder.Services.AddDbContext<HospitalHubContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("ConnectionString")));
 
+// -------------------------
+// SignalR
+// -------------------------
 builder.Services.AddSignalR();
 
+// -------------------------
+// CORS (for React frontend)
+// -------------------------
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReactApp",
-        policy => policy.WithOrigins(["http://localhost:5173", "http://localhost:5174"])
-                        .AllowAnyHeader()
-                        .AllowAnyMethod()
-                        .AllowCredentials());
+    options.AddPolicy("AllowReactApp", policy =>
+        policy.WithOrigins("http://localhost:5173", "http://localhost:5174") // React dev servers
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials());
 });
 
-builder.Services.AddSingleton<IDictionary<string, UserConnection>>(opts => new Dictionary<string, UserConnection>());
-
+// -------------------------
+// Cloudinary
+// -------------------------
 builder.Services.Configure<CloudinarySettings>(
     builder.Configuration.GetSection("CloudinarySettings")
 );
@@ -38,17 +54,46 @@ builder.Services.AddSingleton(provider =>
     return new Cloudinary(account);
 });
 
-var app = builder.Build();
+// -------------------------
+// JWT Authentication
+// -------------------------
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
 
-app.UseRouting();
-app.UseCors("AllowReactApp");
-app.UseEndpoints(endpoints =>
+builder.Services.AddAuthentication(options =>
 {
-    endpoints.MapHub<VideoCallHub>("/chat");
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings.Issuer,
+        ValidAudience = jwtSettings.Audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key))
+    };
 });
 
+// -------------------------
+// Dependency Injection
+// -------------------------
+builder.Services.AddSingleton<TokenService>();
+builder.Services.AddSingleton<PasswordService>();
+builder.Services.AddAuthorization();
 
+// -------------------------
+// Build app
+// -------------------------
+var app = builder.Build();
 
+// -------------------------
+// Middleware pipeline
+// -------------------------
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -57,9 +102,14 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseRouting();
 
+app.UseCors("AllowReactApp");
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<VideoCallHub>("/chat");
 
 app.Run();

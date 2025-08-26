@@ -106,7 +106,7 @@ namespace Hospital_Hub_Portal.Controllers
     {
         public int DoctorId { get; set; }   // taken from frontend
         public string Message { get; set; }
-        public string SendBy { get; set; }  // "Doctor" or "Patient"
+        public int SendBy { get; set; }  // "Doctor" or "Patient"
     }
 }
 
