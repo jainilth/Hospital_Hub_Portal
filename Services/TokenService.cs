@@ -17,6 +17,7 @@ namespace Hospital_Hub_Portal.Services
             _jwtSettings = jwtSettings.Value;
         }
 
+        #region CreateAccessToken
         public string CreateAccessToken(HhUser user)
         {
             var claims = new[]
@@ -38,6 +39,7 @@ namespace Hospital_Hub_Portal.Services
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+            #endregion
         }
     }
 }
