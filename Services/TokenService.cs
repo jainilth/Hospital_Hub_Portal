@@ -20,11 +20,15 @@ namespace Hospital_Hub_Portal.Services
         #region CreateAccessToken
         public string CreateAccessToken(HhUser user)
         {
+            var roleValue = string.IsNullOrWhiteSpace(user.UserRole) ? "User" : user.UserRole;
+
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.UserEmail),
-                new Claim("role", user.UserRole)
+                new Claim(ClaimTypes.Role, roleValue),
+                new Claim("role", roleValue)
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
