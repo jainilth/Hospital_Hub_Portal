@@ -3,6 +3,7 @@ using Hospital_Hub_Portal.Models.Auth;
 using Hospital_Hub_Portal.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using System.ComponentModel.DataAnnotations;
 
 namespace Hospital_Hub_Portal.Controllers
 {
@@ -42,19 +43,31 @@ namespace Hospital_Hub_Portal.Controllers
                     return BadRequest(new { Message = "All fields are required" });
                 }
 
+                // Validate email format
+                if (!new EmailAddressAttribute().IsValid(request.Email))
+                {
+                    return BadRequest(new { Message = "Invalid email format" });
+                }
+
+                // Validate password strength
+                if (request.Password.Length < 6)
+                {
+                    return BadRequest(new { Message = "Password must be at least 6 characters long" });
+                }
+
                 // Check if user already exists
-                if (_context.HhUsers.Any(u => u.UserEmail == request.Email))
+                if (_context.HhUsers.Any(u => u.UserEmail.ToLower() == request.Email.ToLower()))
                 {
                     return BadRequest(new { Message = "User with this email already exists" });
                 }
 
-                // Hash password
+                // Hash password with BCrypt
                 var hashedPassword = _passwordService.HashPassword(request.Password);
 
                 var user = new HhUser
                 {
-                    UserName = request.Name,
-                    UserEmail = request.Email,
+                    UserName = request.Name.Trim(),
+                    UserEmail = request.Email.Trim(),
                     UserPassword = hashedPassword,
                     UserRole = string.IsNullOrEmpty(request.Role) ? "User" : request.Role,
                     CreatedDate = DateTime.UtcNow
@@ -84,26 +97,27 @@ namespace Hospital_Hub_Portal.Controllers
                     return BadRequest(new { Message = "Email and password are required" });
                 }
 
-                var email = request.Email?.Trim();
-                var user = _context.HhUsers.FirstOrDefault(u => u.UserEmail.ToLower() == email.ToLower());
+                var email = request.Email?.Trim().ToLower();
+                var user = _context.HhUsers.FirstOrDefault(u => u.UserEmail.ToLower() == email);
                 if (user == null)
                 {
                     return Unauthorized(new { Message = "Invalid email or password" });
                 }
 
-                // Verify password (support legacy plaintext passwords by rehousing on the fly)
+                // Verify password with BCrypt
                 var passwordValid = _passwordService.VerifyPassword(request.Password, user.UserPassword);
-                if (!passwordValid)
+                
+                // Legacy fallback: if stored password is plaintext or SHA256 and matches input, rehash with BCrypt
+                if (!passwordValid && (user.UserPassword == request.Password || user.UserPassword == Convert.ToBase64String(System.Security.Cryptography.SHA256.Create().ComputeHash(System.Text.Encoding.UTF8.GetBytes(request.Password)))))
                 {
-                    // Legacy fallback: if stored password is plaintext and matches input, rehash and save
-                    if (user.UserPassword == request.Password)
-                    {
-                        user.UserPassword = _passwordService.HashPassword(request.Password);
-                        _context.HhUsers.Update(user);
-                        _context.SaveChanges();
-                        passwordValid = true;
-                    }
+                    user.UserPassword = _passwordService.HashPassword(request.Password);
+                    _context.HhUsers.Update(user);
+                    _context.SaveChanges();
+                    passwordValid = true;
                 }
+
+
+                var requestRole = user.UserRole;
 
                 if (!passwordValid)
                 {
