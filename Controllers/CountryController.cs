@@ -119,7 +119,24 @@ namespace Hospital_Hub_API.Controllers
             {
                 return NotFound();
             }
-            return Ok(country);
+
+            var countryWithCounts = new
+            {
+                country.CountryId,
+                country.CountryName,
+                country.CreatedDate,
+                country.ModifiedDate,
+                StateCount = context.HhStates.Count(s => s.CountryId == country.CountryId),
+                CityCount = context.HhCities.Count(c => c.State.CountryId == country.CountryId),
+                HospitalCount = context.HhHospitals
+                    .Count(h => context.HhCities
+                    .Any(c => c.CityId == h.CityId &&
+                    context.HhStates.Any(s => s.StateId == c.StateId && s.CountryId == country.CountryId)
+                )
+            )
+            };
+
+            return Ok(countryWithCounts);
         }
         #endregion
 

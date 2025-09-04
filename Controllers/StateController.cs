@@ -110,22 +110,6 @@ namespace Hospital_Hub_API.Controllers
         }
         #endregion
 
-        #region Get Country With Count Of State And City and Hospital
-        [HttpGet]
-        public IActionResult GetAllCountries()
-        {
-            var countries = context.HhCountries
-                .Select(country => new
-                {
-                    country.CountryId,
-                    country.CountryName,
-                    StateCount = context.HhStates.Count(s => s.CountryId == country.CountryId),
-                    CityCount = context.HhCities.Count(c => c.State.CountryId == country.CountryId),
-                }).ToList();
-
-            return Ok(countries);
-        }
-        #endregion
 
         #region GetStateById
         [HttpGet("{id}")]
@@ -136,7 +120,22 @@ namespace Hospital_Hub_API.Controllers
             {
                 return NotFound();
             }
-            return Ok(state);
+
+            var stateWithCounts = new
+            {
+                state.StateId,
+                state.StateName,
+                state.CountryId,
+                state.CreatedDate,
+                state.ModifiedDate,
+                CountryName = context.HhCountries
+                    .Where(c => c.CountryId == state.CountryId)
+                    .Select(c => c.CountryName).FirstOrDefault(),
+                CityCount = context.HhCities.Count(city => city.StateId == state.StateId),
+                HospitalCount = context.HhHospitals.Count(h => h.StateId == state.StateId)
+            };
+
+            return Ok(stateWithCounts);
         }
         #endregion
 

@@ -161,9 +161,12 @@ namespace Hospital_Hub_API.Controllers
                     c.CityId,
                     c.CityName,
                     c.StateId,
+                    c.CreatedDate,
+                    c.ModifiedDate,
                     StateName = c.State.StateName,
                     CountryId = c.State.Country.CountryId,
-                    CountryName = c.State.Country.CountryName
+                    CountryName = c.State.Country.CountryName,
+                    HospitalCount = context.HhHospitals.Count(h => h.CityId == c.CityId)
                 })
                 .FirstOrDefault();
 
