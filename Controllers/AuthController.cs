@@ -30,6 +30,52 @@ namespace Hospital_Hub_Portal.Controllers
             return Ok(new { Message = "Auth API is working!", Timestamp = DateTime.UtcNow });
         }
 
+        // ✅ Create test user endpoint
+        [AllowAnonymous]
+        [HttpPost("create-test-user")]
+        public IActionResult CreateTestUser()
+        {
+            try
+            {
+                var testEmail = "admin@test.com";
+                var testPassword = "admin123";
+                var testName = "Test Admin";
+
+                // Check if test user already exists
+                if (_context.HhUsers.Any(u => u.UserEmail.ToLower() == testEmail.ToLower()))
+                {
+                    return Ok(new { Message = "Test user already exists", Email = testEmail });
+                }
+
+                // Hash password
+                var hashedPassword = _passwordService.HashPassword(testPassword);
+
+                var user = new HhUser
+                {
+                    UserName = testName,
+                    UserEmail = testEmail,
+                    UserPassword = hashedPassword,
+                    UserRole = "Admin",
+                    CreatedDate = DateTime.UtcNow
+                };
+
+                _context.HhUsers.Add(user);
+                _context.SaveChanges();
+
+                return Ok(new 
+                { 
+                    Message = "Test user created successfully",
+                    Email = testEmail,
+                    Password = testPassword,
+                    Role = "Admin"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Error creating test user", Error = ex.Message });
+            }
+        }
+
         // ✅ Register endpoint
         [AllowAnonymous]
         [HttpPost("register")]

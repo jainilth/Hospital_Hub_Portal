@@ -1,4 +1,8 @@
-﻿using Hospital_Hub_Portal.Models;
+﻿using System.Security.Claims;
+using System.Threading.Tasks;
+using Hospital_Hub_Portal.Dtos;
+using Hospital_Hub_Portal.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,6 +10,7 @@ namespace Hospital_Hub_Portal.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize] // Require JWT
     public class ChatController : ControllerBase
     {
         private readonly HospitalHubContext _context;
@@ -15,98 +20,125 @@ namespace Hospital_Hub_Portal.Controllers
             _context = context;
         }
 
-        // ---------------- Start Chat ----------------
-        [HttpPost("StartChat")]
-        public async Task<IActionResult> StartChat([FromBody] StartChatRequest request)
+        #region Chat Send
+        [HttpPost("send")]
+        public async Task<IActionResult> SendMessage([FromBody] SendMessageRequest request)
         {
-            if (request == null || request.DoctorId <= 0)
-                return BadRequest("Invalid request");
+            // ✅ 1. Validate input
+            if (string.IsNullOrEmpty(request.Message))
+                return BadRequest("Message cannot be empty.");
 
-            int patientId = 3; // default patient ID
-
-            // Step 1: Ensure both Doctor and Patient exist in User table
-            var usersToAdd = new List<int> { request.DoctorId, patientId };
-
-            foreach (var chatUserId in usersToAdd)
-            {
-                bool exists = await _context.Users.AnyAsync(u => u.ChatUserId == chatUserId);
-                if (!exists)
-                {
-                    var newUser = new User
-                    {
-                        ChatUserId = chatUserId
-                    };
-                    _context.Users.Add(newUser);
-                }
-            }
-            await _context.SaveChangesAsync();
-
-            // Step 2: Check if conversation already exists
+            // ✅ 2. Find or create conversation
             var conversation = await _context.Conversations
-                .FirstOrDefaultAsync(c => c.DoctorId == request.DoctorId && c.PatientId == patientId);
+                .FirstOrDefaultAsync(c => c.DoctorId == request.DoctorId && c.PatientId == request.PatientId);
 
             if (conversation == null)
             {
                 conversation = new Conversation
                 {
                     DoctorId = request.DoctorId,
-                    PatientId = patientId
+                    PatientId = request.PatientId
                 };
 
                 _context.Conversations.Add(conversation);
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(); // need ID for message FK
             }
 
-            return Ok(new { message = "Chat setup completed successfully", conversationId = conversation.ConversationId });
-        }
+            // ✅ 3. Decide sender based on userRole
+            int sendById;
+            if (request.UserRole == "User")
+                sendById = request.PatientId;
+            else if (request.UserRole == "Admin")
+                sendById = request.DoctorId;
+            else
+                return BadRequest("Invalid userRole. Must be 'Patient' or 'Doctor'.");
 
-        // ---------------- Send Message ----------------
-        [HttpPost("SendMSG")]
-        public async Task<IActionResult> SendMSG([FromBody] SendMessageRequest request)
-        {
-            if (request == null || string.IsNullOrWhiteSpace(request.Message))
-                return BadRequest("Invalid request");
-
-            int patientId = 3; // default patient ID
-            int doctorId = request.DoctorId; // 
-
-            // Step 1: Find conversation
-            var conversation = await _context.Conversations
-                .FirstOrDefaultAsync(c => c.DoctorId == doctorId && c.PatientId == patientId);
-
-            if (conversation == null)
-            {
-                return NotFound("Conversation does not exist. Please start chat first.");
-            }
-
-            // Step 2: Create message
-            var newMessage = new Message
+            // ✅ 4. Save message
+            var message = new Message
             {
                 ConversationId = conversation.ConversationId,
                 Message1 = request.Message,
-                CreatedAt = DateTime.Now,
-                //SendBy = request.SendBy  // comes from frontend ("Doctor" or "Patient")
-                SendBy = 1  // comes from frontend ("Doctor" or "Patient") /////// come from the Frontend Conect With Frontend and then take id from that because i dont have implimnted the jwt
+                SendBy = sendById,
+                CreatedAt = DateTime.UtcNow
             };
 
-            _context.Messages.Add(newMessage);
+            _context.Messages.Add(message);
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Message sent successfully", messageId = newMessage.MessageId });
+            // ✅ 5. Return response
+            return Ok(new
+            {
+                messageId = message.MessageId,
+                conversationId = conversation.ConversationId,
+                message = message.Message1,
+                sendBy = message.SendBy,
+                createdAt = message.CreatedAt
+            });
         }
-    }
+        #endregion
 
-    // DTOs
-    public class StartChatRequest
+    public class PatientRequestDto
     {
         public int DoctorId { get; set; }
+        public int UserId { get; set; }
+        public string Role { get; set; }
+        public string Admin { get; set; }
+        public string Email { get; set; }
     }
 
-    public class SendMessageRequest
-    {
-        public int DoctorId { get; set; }   // taken from frontend
-        public string Message { get; set; }
-        public int SendBy { get; set; }  // "Doctor" or "Patient"
+        //#region Get Patient IDs who have sent messages to the Doctor
+        //[HttpPost("patients")]
+        //[Authorize] // requires token
+        //public async Task<IActionResult> GetPatientsByDoctor([FromBody] PatientRequestDto request)
+        //{
+        //    var patientIds = await _context.Conversations
+        //        .Where(c => c.DoctorId == request.DoctorId)
+        //        .Select(c => c.PatientId)
+        //        .Distinct()
+        //        .ToListAsync();
+
+        //    return Ok(new
+        //    {
+        //        request.DoctorId,
+        //        request.UserId,
+        //        request.Role,
+        //        request.Admin,
+        //        request.Email,
+        //        Patients = patientIds
+        //    });
+        //}
+        //#endregion
+
+        #region Test endpoint without authentication (for testing only)
+        [HttpPost("patients-test")]
+        [AllowAnonymous] // No authentication required for testing
+        public async Task<IActionResult> GetPatientsByDoctorTest([FromBody] PatientRequestDto request)
+        {
+            var patientIds = await _context.Conversations
+                .Where(c => c.DoctorId == request.DoctorId)
+                .Select(c => c.PatientId)
+                .Distinct()
+                .ToListAsync();
+
+            return Ok(new
+            {
+                request.DoctorId,
+                request.UserId,
+                request.Role,
+                request.Admin,
+                request.Email,
+                Patients = patientIds,
+                Message = "This is a test endpoint - no authentication required"
+            });
+        }
+        #endregion
+
+        //#region Get Chat in the Message 
+        //[HttpGet("getChat")]
+        //public IActionResult getChat()
+        //{
+
+        //}
+        //#endregion
     }
 }
-
