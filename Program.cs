@@ -24,7 +24,7 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "HospitalHub API", Version = "v1" });
 
-    // 🔑 Add JWT Bearer Auth
+    // Add JWT Bearer Auth
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -112,8 +112,11 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = jwtSettings.Issuer,
         ValidAudience = jwtSettings.Audience,
         IssuerSigningKey = new SymmetricSecurityKey(Convert.FromHexString(jwtSettings.Key)) // ✅ Using HEX correctly
+    
     };
 });
+
+
 
 // -------------------------
 // Dependency Injection
