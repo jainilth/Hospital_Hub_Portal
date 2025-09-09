@@ -133,6 +133,41 @@ namespace Hospital_Hub_Portal.Controllers
         }
         #endregion
 
+        #region Get Msg By ID
+        [HttpGet("GetMSG")]
+        public IActionResult GetMSGFromTheIDOfPatientAndDoctor(int doctorId, int patientId)
+        {
+            try
+            {
+                var conversation = _context.Conversations
+                    .FirstOrDefault(c => c.DoctorId == doctorId && c.PatientId == patientId);
+
+                if (conversation == null)
+                {
+                    return NotFound("Conversation not found.");
+                }
+
+                var messages = _context.Messages
+                    .Where(m => m.ConversationId == conversation.ConversationId)
+                    .Select(m => new
+                    {
+                        m.MessageId,
+                        m.Message1,    
+                        m.SendBy,
+                        m.CreatedAt       
+                    })
+                    .ToList();
+
+                return Ok(messages);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+        #endregion
+
+
         //#region Get Chat in the Message 
         //[HttpGet("getChat")]
         //public IActionResult getChat()
