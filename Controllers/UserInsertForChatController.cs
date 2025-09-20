@@ -144,17 +144,25 @@ namespace Hospital_Hub_Portal.Controllers
 
                 if (conversation == null)
                 {
-                    return NotFound("Conversation not found.");
+                    return Ok(new List<object>()); // Return empty list instead of NotFound
                 }
 
                 var messages = _context.Messages
                     .Where(m => m.ConversationId == conversation.ConversationId)
+                    .OrderBy(m => m.CreatedAt) // Sort by creation date (oldest to newest)
                     .Select(m => new
                     {
                         m.MessageId,
                         m.Message1,    
                         m.SendBy,
-                        m.CreatedAt       
+                        m.CreatedAt,
+                        // Determine sender type based on SendBy field
+                        SenderType = m.SendBy == doctorId ? "Doctor" : 
+                                   m.SendBy == patientId ? "Patient" : "Admin",
+                        // Get sender name
+                        SenderName = m.SendBy == doctorId ? 
+                                   _context.HhDoctors.FirstOrDefault(d => d.DoctorId == doctorId).DoctorName :
+                                   _context.HhUsers.FirstOrDefault(u => u.UserId == m.SendBy).UserName
                     })
                     .ToList();
 
@@ -167,6 +175,39 @@ namespace Hospital_Hub_Portal.Controllers
         }
         #endregion
 
+        #region Get Chat Partner Name
+        [HttpGet("GetChatPartnerName")]
+        public IActionResult GetChatPartnerName(int doctorId, int patientId, string userRole)
+        {
+            try
+            {
+                string partnerName = "";
+                
+                if (userRole == "Admin")
+                {
+                    // Admin is chatting with patient, show patient name
+                    var patient = _context.HhUsers.FirstOrDefault(u => u.UserId == patientId);
+                    partnerName = patient?.UserName ?? "Unknown Patient";
+                }
+                else if (userRole == "User")
+                {
+                    // Patient is chatting with doctor, show doctor name
+                    var doctor = _context.HhDoctors.FirstOrDefault(d => d.DoctorId == doctorId);
+                    partnerName = doctor?.DoctorName ?? "Unknown Doctor";
+                }
+                else
+                {
+                    return BadRequest("Invalid user role");
+                }
+
+                return Ok(new { partnerName });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+        #endregion
 
         //#region Get Chat in the Message 
         //[HttpGet("getChat")]
