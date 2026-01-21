@@ -8,7 +8,7 @@ namespace Hospital_Hub_API.Controllers
 {
     [Route("/api/[controller]/[action]")]
     [ApiController]
-    [Authorize(Roles = "Admin, User")]
+    [Authorize(Roles = "Admin")]
     public class CountryController : ControllerBase
     {
         private readonly HospitalHubContext context;

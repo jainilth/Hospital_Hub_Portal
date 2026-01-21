@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hospital_Hub_Portal.Models;
@@ -26,9 +27,11 @@ public partial class HhSpecialization
     public DateTime? ModifiedDate { get; set; }
 
     [InverseProperty("Specialization")]
+    [JsonIgnore]
     public virtual ICollection<HhDoctor> HhDoctors { get; set; } = new List<HhDoctor>();
 
     [ForeignKey("UserId")]
     [InverseProperty("HhSpecializations")]
+    [JsonIgnore]
     public virtual HhUser? User { get; set; }
 }
