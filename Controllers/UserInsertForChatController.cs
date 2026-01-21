@@ -10,7 +10,7 @@ namespace Hospital_Hub_Portal.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize] // Require JWT
+    [Authorize(Roles = "Admin, User")] // Require JWT with Role
     public class ChatController : ControllerBase
     {
         private readonly HospitalHubContext _context;

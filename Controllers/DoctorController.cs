@@ -4,11 +4,13 @@ using Hospital_Hub_Portal.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Hospital_Hub_API.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
     public class DoctorController : Controller
     {
         private readonly HospitalHubContext _context;
@@ -236,6 +238,7 @@ namespace Hospital_Hub_API.Controllers
 
         #region AddDoctor
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddDoctor([FromForm] DoctorWithPhotoDto dto)
         {
            var doctor = new HhDoctor
@@ -296,6 +299,7 @@ namespace Hospital_Hub_API.Controllers
 
         #region UpdateDoctor
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateDoctor(int id, [FromForm] DoctorWithPhotoDto dto)
         {
             try
@@ -434,6 +438,7 @@ namespace Hospital_Hub_API.Controllers
 
         #region NormalizeDoctorStatuses
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> NormalizeDoctorStatuses()
         {
             try
@@ -501,6 +506,7 @@ namespace Hospital_Hub_API.Controllers
 
         #region DeleteDoctor
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult DeleteDoctor(int id)
         {
             var doctor = _context.HhDoctors.Find(id);

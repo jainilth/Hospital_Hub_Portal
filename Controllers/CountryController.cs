@@ -1,5 +1,6 @@
 ﻿using Hospital_Hub_Portal.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using OfficeOpenXml;
 using System.Data;
 
@@ -7,6 +8,7 @@ namespace Hospital_Hub_API.Controllers
 {
     [Route("/api/[controller]/[action]")]
     [ApiController]
+    [Authorize(Roles = "Admin, User")]
     public class CountryController : ControllerBase
     {
         private readonly HospitalHubContext context;
@@ -25,6 +27,8 @@ namespace Hospital_Hub_API.Controllers
                 {
                     country.CountryId,
                     country.CountryName,
+                    country.CreatedDate,
+                    country.ModifiedDate,
                     countryCode = country.CountryName.Substring(0, 2).ToUpper(),
                     StateCount = context.HhStates.Count(s => s.CountryId == country.CountryId),
                     CityCount = context.HhCities.Count(c => c.State.CountryId == country.CountryId),
@@ -142,6 +146,7 @@ namespace Hospital_Hub_API.Controllers
 
         #region AddCountry
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public IActionResult AddCountry([FromBody] HhCountry hhCountry)
         {
             if (hhCountry == null)
@@ -161,6 +166,7 @@ namespace Hospital_Hub_API.Controllers
 
         #region UpdateCountry
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult UpdateCountry(int id, [FromBody] HhCountry hhCountry)
         {
             if (id != hhCountry.CountryId)
@@ -184,6 +190,7 @@ namespace Hospital_Hub_API.Controllers
 
         #region DeleteCountry
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult DeleteCountry(int id)
         {
             var country = context.HhCountries.Find(id);

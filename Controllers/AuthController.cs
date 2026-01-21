@@ -9,6 +9,7 @@ namespace Hospital_Hub_Portal.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "Admin, User")]
     public class AuthController : ControllerBase
     {
         private readonly HospitalHubContext _context;
@@ -195,7 +196,7 @@ namespace Hospital_Hub_Portal.Controllers
         }
 
         // ✅ Validate token endpoint
-        [Authorize]
+        [Authorize(Roles = "Admin, User")]
         [HttpGet("validate")]
         public IActionResult ValidateToken()
         {
@@ -232,7 +233,7 @@ namespace Hospital_Hub_Portal.Controllers
         }
 
         // ✅ Get current user info (protected endpoint)
-        [Authorize]
+        [Authorize(Roles = "Admin, User")]
         [HttpGet("me")]
         public IActionResult GetCurrentUser()
         {

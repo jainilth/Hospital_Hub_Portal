@@ -1,11 +1,13 @@
 ﻿using Hospital_Hub_Portal.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using OfficeOpenXml;
 
 namespace Hospital_Hub_API.Controllers
 {
     [Route("/api/[controller]/[action]")]
     [ApiController]
+    [Authorize(Roles = "Admin, User")]
     public class StateController : Controller
     {
         private readonly HospitalHubContext context;
@@ -23,7 +25,7 @@ namespace Hospital_Hub_API.Controllers
 
         #region GetState List And Their Country and Count Of City and Hospital
         [HttpGet]
-        public IActionResult GetALlSatate()
+        public IActionResult GetAllStates()
         {
             var states = context.HhStates
                     .Select(state => new
@@ -141,6 +143,7 @@ namespace Hospital_Hub_API.Controllers
 
         #region AddState
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public IActionResult AddState([FromBody] HhState hhState)
         {
             if (hhState == null)
@@ -157,6 +160,7 @@ namespace Hospital_Hub_API.Controllers
 
         #region UpdateState
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult UpdateState(int id, [FromBody] HhState hhState)
         {
             if (hhState == null || hhState.StateId != id)
@@ -177,6 +181,7 @@ namespace Hospital_Hub_API.Controllers
 
         #region DeleteState
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult DeleteState(int id)
         {
             var state = context.HhStates.Find(id);

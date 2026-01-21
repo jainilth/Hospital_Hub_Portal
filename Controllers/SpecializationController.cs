@@ -1,10 +1,12 @@
 ﻿using Hospital_Hub_Portal.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Hospital_Hub_Portal.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
+    [Authorize(Roles = "Admin, User")]
     public class SpecializationController : Controller
     {
         private readonly HospitalHubContext context;
@@ -37,6 +39,7 @@ namespace Hospital_Hub_Portal.Controllers
 
         #region AddSpecialization
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public IActionResult AddSpecialization([FromBody] HhSpecialization hhSpecialization)
         {
             if (hhSpecialization == null)
@@ -53,6 +56,7 @@ namespace Hospital_Hub_Portal.Controllers
 
         #region UpdateSpecialization
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult UpdateSpecialization(int id, [FromBody] HhSpecialization hhSpecialization)
         {
             if (hhSpecialization == null || hhSpecialization.SpecializationId != id)
@@ -73,6 +77,7 @@ namespace Hospital_Hub_Portal.Controllers
 
         #region DeleteSpecialization
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult DeleteSpecialization(int id)
         {
             var specialization = context.HhSpecializations.Find(id);

@@ -1,11 +1,13 @@
 ﻿using Hospital_Hub_Portal.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Hospital_Hub_API.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
+    [Authorize(Roles = "Admin, User")]
     public class DoctorAvailableTimeSlotController : Controller
     {
         private readonly HospitalHubContext context;
@@ -52,6 +54,7 @@ namespace Hospital_Hub_API.Controllers
 
         #region AddDoctorAvailableTimeSlot
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public IActionResult AddDoctorAvailableTimeSlot([FromBody] HhDoctorAvailableTimeSlot hhDoctorAvailableTimeSlot)
         {
             if (hhDoctorAvailableTimeSlot == null)
@@ -68,6 +71,7 @@ namespace Hospital_Hub_API.Controllers
 
         #region UpdateDoctorAvailableTimeSlot
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult UpdateDoctorAvailableTimeSlot(int id, [FromBody] HhDoctorAvailableTimeSlot hhDoctorAvailableTimeSlot)
         {
             if (hhDoctorAvailableTimeSlot == null || hhDoctorAvailableTimeSlot.SlotId != id)
@@ -89,6 +93,7 @@ namespace Hospital_Hub_API.Controllers
 
         #region DeleteDoctorAvailableTimeSlot
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult DeleteDoctorAvailableTimeSlot(int id)
         {
             var timeSlot = context.HhDoctorAvailableTimeSlots.Find(id);

@@ -1,10 +1,12 @@
 ﻿using Hospital_Hub_Portal.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Hospital_Hub_API.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
+    [Authorize(Roles = "Admin, User")]
     public class AppointmentCancellationLogController : Controller
     {
         private readonly HospitalHubContext context;
@@ -37,6 +39,7 @@ namespace Hospital_Hub_API.Controllers
 
         #region AddAppointmentCancellationLog
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public IActionResult AddAppointmentCancellationLog([FromBody] HhAppointmentCancellationLog hhAppointmentCancellationLog)
         {
             if (hhAppointmentCancellationLog == null)
@@ -53,6 +56,7 @@ namespace Hospital_Hub_API.Controllers
 
         #region UpdateAppointmentCancellationLog
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult UpdateAppointmentCancellationLog(int id, [FromBody] HhAppointmentCancellationLog hhAppointmentCancellationLog)
         {
             if (hhAppointmentCancellationLog == null || hhAppointmentCancellationLog.LogId != id)
@@ -77,6 +81,7 @@ namespace Hospital_Hub_API.Controllers
 
         #region DeleteAppointmentCancellationLog
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult DeleteAppointmentCancellationLog(int id)
         {
             var log = context.HhAppointmentCancellationLogs.Find(id);

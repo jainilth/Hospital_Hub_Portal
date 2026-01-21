@@ -1,5 +1,6 @@
 ﻿    using Hospital_Hub_Portal.Models;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Authorization;
     using OfficeOpenXml;
     //using Microsoft.EntityFrameworkCore;
     //using OfficeOpenXml;
@@ -10,6 +11,7 @@ namespace Hospital_Hub_API.Controllers
     [Route("/api/[controller]/[action]")]
 
     [ApiController]
+    [Authorize(Roles = "Admin, User")]
     public class CityController : Controller
     {
         private readonly HospitalHubContext context;
@@ -179,6 +181,7 @@ namespace Hospital_Hub_API.Controllers
 
         #region Add City
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public IActionResult AddCity([FromBody] HhCity hhCity)
         {
             if (hhCity == null || string.IsNullOrWhiteSpace(hhCity.CityName) || hhCity.StateId == null)
@@ -198,6 +201,7 @@ namespace Hospital_Hub_API.Controllers
 
         #region Delet City
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult DeleteCity(int id)
             {
                 var city = context.HhCities.FirstOrDefault(c => c.CityId ==  id);
@@ -214,6 +218,7 @@ namespace Hospital_Hub_API.Controllers
 
         #region Edit Citymo
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult CityEdit(int id, [FromBody] HhCity hhCity)
         {
             if (hhCity == null || id != hhCity.CityId)

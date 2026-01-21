@@ -1,10 +1,12 @@
 ﻿using Hospital_Hub_Portal.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Hospital_Hub_Portal.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
+    [Authorize(Roles = "Admin, User")]
     public class LabBookingController : Controller
     {
         private readonly HospitalHubContext context;
@@ -37,6 +39,7 @@ namespace Hospital_Hub_Portal.Controllers
 
         #region AddLabBooking
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public IActionResult AddLabBooking([FromBody] HhLabBooking hhLabBooking)
         {
             if (hhLabBooking == null)
@@ -53,6 +56,7 @@ namespace Hospital_Hub_Portal.Controllers
 
         #region UpdateLabBooking
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult UpdateLabBooking(int id, [FromBody] HhLabBooking hhLabBooking)
         {
             if (hhLabBooking == null || hhLabBooking.BookingId != id)
@@ -77,6 +81,7 @@ namespace Hospital_Hub_Portal.Controllers
 
         #region DeleteLabBooking
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult DeleteLabBooking(int id)
         {
             var booking = context.HhLabBookings.Find(id);

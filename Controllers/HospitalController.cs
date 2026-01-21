@@ -1,10 +1,12 @@
 ﻿using Hospital_Hub_Portal.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Hospital_Hub_API.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
+    [Authorize(Roles = "Admin, User")]
     public class HospitalController : Controller
     {
         private readonly HospitalHubContext context;
@@ -37,6 +39,7 @@ namespace Hospital_Hub_API.Controllers
 
         #region AddHospital
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public IActionResult AddHospital([FromBody] HhHospital hhHospital)
         {
             if (hhHospital == null)
@@ -53,6 +56,7 @@ namespace Hospital_Hub_API.Controllers
 
         #region UpdateHospital
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult UpdateHospital(int id, [FromBody] HhHospital hhHospital)
         {
             if (hhHospital == null || hhHospital.HospitalId != id)
@@ -75,6 +79,7 @@ namespace Hospital_Hub_API.Controllers
 
         #region DeleteHospital
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult DeleteHospital(int id)
         {
             var hospital = context.HhHospitals.Find(id);

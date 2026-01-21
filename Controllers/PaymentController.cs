@@ -1,10 +1,12 @@
 ﻿using Hospital_Hub_Portal.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Hospital_Hub_Portal.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
+    [Authorize(Roles = "Admin, User")]
     public class PaymentController : Controller
     {
         private readonly HospitalHubContext context;
@@ -37,6 +39,7 @@ namespace Hospital_Hub_Portal.Controllers
 
         #region AddPayment
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public IActionResult AddPayment([FromBody] HhPayment hhPayment)
         {
             if (hhPayment == null)
@@ -53,6 +56,7 @@ namespace Hospital_Hub_Portal.Controllers
 
         #region UpdatePayment
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult UpdatePayment(int id, [FromBody] HhPayment hhPayment)
         {
             if (hhPayment == null || hhPayment.PaymentId != id)
@@ -74,6 +78,7 @@ namespace Hospital_Hub_Portal.Controllers
 
         #region DeletePayment
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult DeletePayment(int id)
         {
             var payment = context.HhPayments.Find(id);

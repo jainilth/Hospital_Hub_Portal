@@ -1,10 +1,12 @@
 ﻿using Hospital_Hub_Portal.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Hospital_Hub_Portal.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
+    [Authorize(Roles = "Admin, User")]
     public class LabTestController : Controller
     {
         private readonly HospitalHubContext context;
@@ -37,6 +39,7 @@ namespace Hospital_Hub_Portal.Controllers
 
         #region AddLabTest
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public IActionResult AddLabTest([FromBody] HhLabTest hhLabTest)
         {
             if (hhLabTest == null)
@@ -53,6 +56,7 @@ namespace Hospital_Hub_Portal.Controllers
 
         #region UpdateLabTest
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult UpdateLabTest(int id, [FromBody] HhLabTest hhLabTest)
         {
             if (hhLabTest == null || hhLabTest.TestId != id)
@@ -75,6 +79,7 @@ namespace Hospital_Hub_Portal.Controllers
 
         #region DeleteLabTest
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult DeleteLabTest(int id)
         {
             var test = context.HhLabTests.Find(id);
