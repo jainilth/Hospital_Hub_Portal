@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hospital_Hub_Portal.Models;
@@ -46,19 +47,24 @@ public partial class HhAppointment
 
     [ForeignKey("DoctorId")]
     [InverseProperty("HhAppointments")]
+    [JsonIgnore]
     public virtual HhDoctor? Doctor { get; set; }
 
     [InverseProperty("Appointment")]
+    [JsonIgnore]
     public virtual ICollection<HhAppointmentCancellationLog> HhAppointmentCancellationLogs { get; set; } = new List<HhAppointmentCancellationLog>();
 
     [InverseProperty("Appointment")]
+    [JsonIgnore]
     public virtual ICollection<HhPayment> HhPayments { get; set; } = new List<HhPayment>();
 
     [ForeignKey("HospitalId")]
     [InverseProperty("HhAppointments")]
+    [JsonIgnore]
     public virtual HhHospital? Hospital { get; set; }
 
     [ForeignKey("UserId")]
     [InverseProperty("HhAppointments")]
+    [JsonIgnore]
     public virtual HhUser? User { get; set; }
 }

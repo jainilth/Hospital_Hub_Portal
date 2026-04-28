@@ -6,7 +6,7 @@ namespace Hospital_Hub_Portal.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    [Authorize(Roles = "Admin, User")]
+    [Authorize(Roles = "Admin")]
     public class UserController : Controller
     {
         private readonly HospitalHubContext context;
